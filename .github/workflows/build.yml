@@ -1,0 +1,41 @@
+name: Build Android APK from Zip
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Extract Project Zip
+        run: |
+          # Yeh command aapki upload ki gayi zip file ko extract karegi
+          unzip \*.zip -d project_folder
+          cd project_folder
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: |
+          cd project_folder
+          chmod +x gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd project_folder
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sarah_AI_v1
+          path: project_folder/app/build/outputs/apk/debug/app-debug.apk
+          
