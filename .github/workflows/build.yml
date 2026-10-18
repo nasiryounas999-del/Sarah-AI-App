@@ -1,4 +1,4 @@
-name: Build Android APK from Zip
+name: Build Android APK Fix
 
 on:
   push:
@@ -13,9 +13,8 @@ jobs:
 
       - name: Extract Project Zip
         run: |
-          # Yeh command aapki upload ki gayi zip file ko extract karegi
-          unzip \*.zip -d project_folder
-          cd project_folder
+          unzip \*.zip -d extracted_files
+          ls -R extracted_files
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -23,19 +22,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Grant execute permission for gradlew
+      - name: Find and Build APK
         run: |
-          cd project_folder
+          # Yeh script khud gradlew file ko dhoond kar build chala degi
+          PROJECT_DIR=$(find extracted_files -name "gradlew" -exec dirname {} \;)
+          echo "Found project at: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
           chmod +x gradlew
-
-      - name: Build Debug APK
-        run: |
-          cd project_folder
           ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Sarah_AI_v1
-          path: project_folder/app/build/outputs/apk/debug/app-debug.apk
-          
+          path: '**/build/outputs/apk/debug/app-debug.apk'
